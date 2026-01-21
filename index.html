@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventReach - Your Personal Invitation Concierge</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- ✅ Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { font-family: "Inter", sans-serif; }
+    h1, h2, h3 { font-family: "Playfair Display", serif; }
+    .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
+    #pricing-section { display: none; }
+  </style>
+</head>
+
+<body class="bg-rose-50/30 text-gray-800">
+
+  <nav class="fixed w-full z-50 glass border-b border-rose-100 px-6 py-4 flex justify-between items-center">
+    <div class="text-2xl font-bold text-rose-600 tracking-tight">
+      EventReach<span class="text-indigo-600">.in</span>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <a href="https://wa.me/91XXXXXXXXXX"
+        class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">
+        WhatsApp Us
+      </a>
+    </div>
+  </nav>
+
+  <header class="relative pt-32 pb-20 px-6 text-center overflow-hidden">
+    <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+      Leave the Invitations <br><span class="text-rose-600">to us.</span>
+    </h2>
+    <p class="max-w-2xl mx-auto text-lg text-gray-600 leading-relaxed mb-8">
+      Specializing in Telugu, Hindi, and English outreach. We call your guests and manage your RSVP list professionally.
+    </p>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start pb-20">
+
+    <div class="space-y-10">
+      <div>
+        <h3 class="text-3xl font-bold mb-6">How we help you</h3>
+        <div class="grid gap-6">
+          <div class="flex gap-4">
+            <div class="bg-white p-3 rounded-2xl shadow-sm text-2xl">🌍</div>
+            <div>
+              <h4 class="font-bold text-lg">Native Language Calling</h4>
+              <p class="text-gray-600">Warm, respectful invitations in Telugu, Hindi, or English.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-rose-50" id="form-card">
+      <h3 class="text-2xl font-bold mb-2 text-center">Book Your Slot</h3>
+      <p class="text-center text-gray-500 mb-8 text-sm">
+        Details will be saved to our database and emailed to us.
+      </p>
+
+      <!-- ✅ Formspree + Supabase -->
+      <form id="inquiryForm" action="https://formspree.io/f/xdaapbje" method="POST" class="space-y-5">
+
+        <input type="text" name="name" placeholder="Full Name"
+          class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+          required />
+
+        <div class="grid grid-cols-2 gap-4">
+          <input type="tel" name="phone" placeholder="Phone Number"
+            class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+            required />
+
+          <input type="number" name="guest_count" placeholder="No. of Guests"
+            class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+            required />
+        </div>
+
+        <select name="language"
+          class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+          required>
+          <option value="">Preferred Language</option>
+          <option value="Telugu">Telugu</option>
+          <option value="Hindi">Hindi</option>
+          <option value="English">English</option>
+        </select>
+
+        <textarea name="message" placeholder="Describe your event details..."
+          class="w-full p-4 bg-gray-50 border-none rounded-2xl h-32 focus:ring-2 focus:ring-rose-400 outline-none"></textarea>
+
+        <button type="submit" id="submitBtn"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg">
+          Submit Inquiry
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+  <script>
+    // ✅ Supabase Setup (YOUR PROJECT)
+    const SB_URL = "https://camzrkmcnxqwaaseyhsa.supabase.co";
+    const SB_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt"; // ✅ paste your real publishable key
+
+    // ✅ Create Supabase client
+    const db = window.supabase.createClient(SB_URL, SB_KEY);
+
+    console.log("✅ Supabase Loaded Client:", db);
+
+    const form = document.getElementById("inquiryForm");
+    const btn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      btn.disabled = true;
+      btn.innerText = "Saving Details...";
+
+      const formData = new FormData(form);
+
+      const dataToSave = {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        guest_count: parseInt(formData.get("guest_count")),
+        language: formData.get("language"),
+        message: formData.get("message"),
+        status: "pending"
+      };
+
+      try {
+        // ✅ 1) Insert to Supabase DB
+        const { data, error } = await db
+          .from("inquiries")
+          .insert([dataToSave])
+          .select();
+
+        // ✅ Debug Output
+        console.log("✅ Supabase Insert Result:", data);
+        console.log("❌ Supabase Insert Error:", error);
+
+        if (error) {
+          alert("Database Error: " + error.message);
+          btn.disabled = false;
+          btn.innerText = "Submit Inquiry";
+          return;
+        }
+
+        // ✅ 2) Email send (Formspree)
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: { "Accept": "application/json" }
+        });
+
+        if (response.ok) {
+          document.getElementById("form-card").innerHTML = `
+            <div class="text-center py-10">
+              <h3 class="text-3xl font-bold text-green-600 mb-4">Success!</h3>
+              <p class="text-gray-600">Your inquiry has been saved in Supabase and emailed to us.</p>
+              <button onclick="location.reload()"
+                class="mt-6 text-indigo-600 font-bold underline">
+                Add New Inquiry
+              </button>
+            </div>`;
+        } else {
+          alert("✅ Saved in Supabase, but ❌ Email failed!");
+          btn.disabled = false;
+          btn.innerText = "Submit Inquiry";
+        }
+
+      } catch (err) {
+        alert("❌ Fetch Error: " + err.message);
+        console.error(err);
+        btn.disabled = false;
+        btn.innerText = "Submit Inquiry";
+      }
+    });
+  </script>
+
+</body>
+</html>
