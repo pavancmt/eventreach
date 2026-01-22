@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventReach Admin Dashboard</title>
+  <title>EventReach Admin</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,291 +11,214 @@
 
 <body class="bg-gray-50 text-gray-800">
 
-  <div class="max-w-6xl mx-auto px-4 py-10">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-3xl font-bold text-indigo-600">EventReach Admin</h1>
-        <p class="text-sm text-gray-500">OTP Login + Dashboard</p>
-      </div>
+<div class="max-w-6xl mx-auto px-4 py-10">
 
-      <button id="logoutBtn"
-        class="hidden px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 font-semibold">
-        🚪 Logout
-      </button>
+  <h1 class="text-3xl font-bold text-indigo-600 mb-2">EventReach Admin Dashboard</h1>
+  <p class="text-gray-500 mb-6">Login using Admin Email + PIN</p>
+
+  <!-- ✅ LOGIN -->
+  <div id="loginBox" class="bg-white p-6 rounded-2xl shadow border mb-8">
+    <h2 class="text-xl font-bold mb-4">Admin Login</h2>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <input id="emailInput" type="email" placeholder="Admin Email"
+        class="p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none">
+
+      <input id="pinInput" type="password" placeholder="Enter PIN (1234)"
+        class="p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none">
     </div>
 
-    <!-- ✅ OTP LOGIN BOX -->
-    <div id="loginBox" class="bg-white border rounded-2xl shadow p-6 mb-8">
-      <h2 class="text-xl font-bold mb-2">Admin OTP Login</h2>
-      <p class="text-sm text-gray-500 mb-4">
-        Only <b>kps13082000@gmail.com</b> can login.
-      </p>
+    <button id="loginBtn"
+      class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition">
+      Login
+    </button>
 
-      <div class="grid md:grid-cols-3 gap-3">
-        <input id="emailInput" type="email"
-          class="p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none"
-          placeholder="Enter admin email" />
-
-        <button id="sendOtpBtn"
-          class="p-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition">
-          Send OTP
-        </button>
-
-        <input id="otpInput" type="text"
-          class="p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none"
-          placeholder="Enter OTP code" />
-      </div>
-
-      <button id="verifyOtpBtn"
-        class="mt-4 w-full p-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition">
-        Verify OTP & Open Dashboard
-      </button>
-
-      <p id="loginStatus" class="mt-3 text-sm font-semibold"></p>
-    </div>
-
-    <!-- ✅ DASHBOARD -->
-    <div id="dashboardBox" class="hidden">
-      <div class="flex flex-col md:flex-row gap-3 items-center justify-between mb-4">
-        <input id="searchBox" type="text"
-          class="w-full p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none"
-          placeholder="Search by name / phone / language..." />
-
-        <button id="refreshBtn"
-          class="px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition w-full md:w-auto">
-          🔄 Refresh
-        </button>
-      </div>
-
-      <div class="bg-white border rounded-2xl shadow overflow-hidden">
-        <div class="p-4 border-b flex items-center justify-between">
-          <h2 class="font-bold text-lg">Customer Inquiries</h2>
-          <span id="countBadge"
-            class="text-sm font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">
-            0 Records
-          </span>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-100 text-gray-600">
-              <tr>
-                <th class="text-left px-4 py-3">Date</th>
-                <th class="text-left px-4 py-3">Name</th>
-                <th class="text-left px-4 py-3">Phone</th>
-                <th class="text-left px-4 py-3">Guests</th>
-                <th class="text-left px-4 py-3">Language</th>
-                <th class="text-left px-4 py-3">Message</th>
-              </tr>
-            </thead>
-            <tbody id="rows" class="divide-y"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <p id="statusMsg" class="mt-4 text-sm font-semibold"></p>
-    </div>
-
+    <p id="loginStatus" class="mt-3 text-sm font-semibold"></p>
   </div>
 
-  <script>
-    // ✅ Replace with your Supabase URL + ANON KEY
-    const SUPABASE_URL = "https://camzrkmcnxgwaaseyhsa.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt";
+  <!-- ✅ DASHBOARD -->
+  <div id="dashboardBox" class="hidden">
 
-    const ADMIN_EMAIL = "kps13082000@gmail.com";
+    <div class="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
+      <input id="searchBox" type="text"
+        class="w-full p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none"
+        placeholder="Search by name / phone / language...">
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      <button id="refreshBtn"
+        class="w-full md:w-auto px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition">
+        Refresh
+      </button>
+    </div>
 
-    const loginBox = document.getElementById("loginBox");
-    const dashboardBox = document.getElementById("dashboardBox");
+    <div class="bg-white rounded-2xl shadow border overflow-hidden">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h2 class="font-bold text-lg">Customer Inquiries</h2>
+        <span id="countBadge" class="text-sm font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">0</span>
+      </div>
 
-    const emailInput = document.getElementById("emailInput");
-    const otpInput = document.getElementById("otpInput");
-    const sendOtpBtn = document.getElementById("sendOtpBtn");
-    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
-    const loginStatus = document.getElementById("loginStatus");
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-100 text-gray-600">
+            <tr>
+              <th class="text-left px-4 py-3">Date</th>
+              <th class="text-left px-4 py-3">Name</th>
+              <th class="text-left px-4 py-3">Phone</th>
+              <th class="text-left px-4 py-3">Guests</th>
+              <th class="text-left px-4 py-3">Language</th>
+              <th class="text-left px-4 py-3">Message</th>
+            </tr>
+          </thead>
+          <tbody id="rows" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
 
-    const refreshBtn = document.getElementById("refreshBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
+    <p id="statusMsg" class="mt-4 text-sm font-semibold"></p>
+  </div>
 
-    const searchBox = document.getElementById("searchBox");
-    const rows = document.getElementById("rows");
-    const countBadge = document.getElementById("countBadge");
-    const statusMsg = document.getElementById("statusMsg");
+</div>
 
-    let allData = [];
+<script>
+  // ✅ Supabase
+  const SUPABASE_URL = "https://camzrkmcnxgwaaseyhsa.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function setLoginStatus(msg, type="info") {
-      loginStatus.textContent = msg;
-      loginStatus.className = "mt-3 text-sm font-semibold";
-      if (type === "success") loginStatus.classList.add("text-green-600");
-      if (type === "error") loginStatus.classList.add("text-red-600");
-      if (type === "info") loginStatus.classList.add("text-gray-600");
+  // ✅ Admin Access Rules
+  const ADMIN_EMAIL = "kps13082000@gmail.com";
+  const ADMIN_PIN = "1234"; // your code
+
+  const loginBox = document.getElementById("loginBox");
+  const dashboardBox = document.getElementById("dashboardBox");
+
+  const emailInput = document.getElementById("emailInput");
+  const pinInput = document.getElementById("pinInput");
+  const loginBtn = document.getElementById("loginBtn");
+  const loginStatus = document.getElementById("loginStatus");
+
+  const refreshBtn = document.getElementById("refreshBtn");
+  const rows = document.getElementById("rows");
+  const searchBox = document.getElementById("searchBox");
+  const countBadge = document.getElementById("countBadge");
+  const statusMsg = document.getElementById("statusMsg");
+
+  let allData = [];
+
+  function setLoginStatus(msg, type="info") {
+    loginStatus.textContent = msg;
+    loginStatus.className = "mt-3 text-sm font-semibold";
+    if (type === "success") loginStatus.classList.add("text-green-600");
+    if (type === "error") loginStatus.classList.add("text-red-600");
+    if (type === "info") loginStatus.classList.add("text-gray-600");
+  }
+
+  function setStatus(msg, type="info") {
+    statusMsg.textContent = msg;
+    statusMsg.className = "mt-4 text-sm font-semibold";
+    if (type === "success") statusMsg.classList.add("text-green-600");
+    if (type === "error") statusMsg.classList.add("text-red-600");
+    if (type === "info") statusMsg.classList.add("text-gray-600");
+  }
+
+  function escapeHtml(str) {
+    return (str || "")
+      .toString()
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function renderTable(data) {
+    rows.innerHTML = "";
+    countBadge.textContent = data.length + " Records";
+
+    if (!data.length) {
+      rows.innerHTML = `
+        <tr>
+          <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+            No inquiries found.
+          </td>
+        </tr>
+      `;
+      return;
     }
 
-    function setStatus(msg, type="info") {
-      statusMsg.textContent = msg;
-      statusMsg.className = "mt-4 text-sm font-semibold";
-      if (type === "success") statusMsg.classList.add("text-green-600");
-      if (type === "error") statusMsg.classList.add("text-red-600");
-      if (type === "info") statusMsg.classList.add("text-gray-600");
-    }
+    data.forEach((item) => {
+      const date = item.created_at ? new Date(item.created_at).toLocaleString() : "-";
 
-    function escapeHtml(str) {
-      return (str || "")
-        .toString()
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-    }
-
-    function renderTable(data) {
-      rows.innerHTML = "";
-      countBadge.textContent = `${data.length} Records`;
-
-      if (!data.length) {
-        rows.innerHTML = `
-          <tr>
-            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-              No inquiries found.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      data.forEach((item) => {
-        const date = item.created_at ? new Date(item.created_at).toLocaleString() : "-";
-        rows.innerHTML += `
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 whitespace-nowrap">${escapeHtml(date)}</td>
-            <td class="px-4 py-3 font-semibold">${escapeHtml(item.name)}</td>
-            <td class="px-4 py-3">${escapeHtml(item.phone)}</td>
-            <td class="px-4 py-3">${escapeHtml(item.guest_count)}</td>
-            <td class="px-4 py-3">${escapeHtml(item.language)}</td>
-            <td class="px-4 py-3 max-w-md">${escapeHtml(item.message || "")}</td>
-          </tr>
-        `;
-      });
-    }
-
-    async function loadInquiries() {
-      setStatus("Loading inquiries...", "info");
-
-      const { data, error } = await supabaseClient
-        .from("inquiries")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error(error);
-        setStatus("❌ Failed to load: " + error.message, "error");
-        return;
-      }
-
-      allData = data || [];
-      renderTable(allData);
-      setStatus("✅ Dashboard loaded successfully", "success");
-    }
-
-    async function showDashboard() {
-      loginBox.classList.add("hidden");
-      dashboardBox.classList.remove("hidden");
-      logoutBtn.classList.remove("hidden");
-      await loadInquiries();
-    }
-
-    async function showLogin() {
-      loginBox.classList.remove("hidden");
-      dashboardBox.classList.add("hidden");
-      logoutBtn.classList.add("hidden");
-    }
-
-    // ✅ Send OTP
-    sendOtpBtn.addEventListener("click", async () => {
-      const email = emailInput.value.trim().toLowerCase();
-
-      if (!email) return setLoginStatus("❌ Enter your email first", "error");
-      if (email !== ADMIN_EMAIL.toLowerCase()) return setLoginStatus("❌ Only Admin email is allowed", "error");
-
-      setLoginStatus("Sending OTP...", "info");
-
-      // This sends the OTP (or magic link depending on Supabase settings)
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email: email
-      });
-
-      if (error) {
-        console.error(error);
-        return setLoginStatus("❌ OTP failed: " + error.message, "error");
-      }
-
-      setLoginStatus("✅ OTP sent! Check your Gmail inbox.", "success");
+      rows.innerHTML += `
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-3 whitespace-nowrap">${escapeHtml(date)}</td>
+          <td class="px-4 py-3 font-semibold">${escapeHtml(item.name)}</td>
+          <td class="px-4 py-3">${escapeHtml(item.phone)}</td>
+          <td class="px-4 py-3">${escapeHtml(item.guest_count)}</td>
+          <td class="px-4 py-3">${escapeHtml(item.language)}</td>
+          <td class="px-4 py-3 max-w-md">${escapeHtml(item.message || "")}</td>
+        </tr>
+      `;
     });
+  }
 
-    // ✅ Verify OTP
-    verifyOtpBtn.addEventListener("click", async () => {
-      const email = emailInput.value.trim().toLowerCase();
-      const token = otpInput.value.trim();
+  async function loadInquiries() {
+    setStatus("Loading inquiries...", "info");
 
-      if (!email) return setLoginStatus("❌ Enter email", "error");
-      if (email !== ADMIN_EMAIL.toLowerCase()) return setLoginStatus("❌ Only Admin email allowed", "error");
-      if (!token) return setLoginStatus("❌ Enter OTP code", "error");
+    const { data, error } = await supabaseClient
+      .from("inquiries")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-      setLoginStatus("Verifying OTP...", "info");
+    if (error) {
+      console.error(error);
+      setStatus("❌ Failed to load inquiries: " + error.message, "error");
+      return;
+    }
 
-      const { data, error } = await supabaseClient.auth.verifyOtp({
-        email,
-        token,
-        type: "email"
-      });
+    allData = data || [];
+    renderTable(allData);
+    setStatus("✅ Loaded successfully", "success");
+  }
 
-      if (error) {
-        console.error(error);
-        return setLoginStatus("❌ Wrong/Expired OTP: " + error.message, "error");
-      }
+  function showDashboard() {
+    loginBox.classList.add("hidden");
+    dashboardBox.classList.remove("hidden");
+    loadInquiries();
+  }
 
-      setLoginStatus("✅ Login success!", "success");
-      await showDashboard();
-    });
+  loginBtn.addEventListener("click", () => {
+    const email = emailInput.value.trim().toLowerCase();
+    const pin = pinInput.value.trim();
 
-    // ✅ Refresh
-    refreshBtn.addEventListener("click", loadInquiries);
+    if (email !== ADMIN_EMAIL.toLowerCase()) {
+      setLoginStatus("❌ Not allowed. Admin email only.", "error");
+      return;
+    }
 
-    // ✅ Search
-    searchBox.addEventListener("input", () => {
-      const q = searchBox.value.trim().toLowerCase();
-      if (!q) return renderTable(allData);
+    if (pin !== ADMIN_PIN) {
+      setLoginStatus("❌ Wrong PIN.", "error");
+      return;
+    }
 
-      const filtered = allData.filter((x) =>
-        (x.name || "").toLowerCase().includes(q) ||
-        (x.phone || "").toLowerCase().includes(q) ||
-        (x.language || "").toLowerCase().includes(q) ||
-        (x.message || "").toLowerCase().includes(q)
-      );
+    setLoginStatus("✅ Login Success! Opening dashboard...", "success");
+    showDashboard();
+  });
 
-      renderTable(filtered);
-    });
+  refreshBtn.addEventListener("click", loadInquiries);
 
-    // ✅ Logout
-    logoutBtn.addEventListener("click", async () => {
-      await supabaseClient.auth.signOut();
-      setStatus("Logged out.", "info");
-      showLogin();
-    });
+  searchBox.addEventListener("input", () => {
+    const q = searchBox.value.trim().toLowerCase();
+    if (!q) return renderTable(allData);
 
-    // ✅ Auto check session
-    (async () => {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data?.session?.user) {
-        showDashboard();
-      } else {
-        showLogin();
-      }
-    })();
-  </script>
+    const filtered = allData.filter((x) =>
+      (x.name || "").toLowerCase().includes(q) ||
+      (x.phone || "").toLowerCase().includes(q) ||
+      (x.language || "").toLowerCase().includes(q) ||
+      (x.message || "").toLowerCase().includes(q)
+    );
+
+    renderTable(filtered);
+  });
+</script>
 
 </body>
 </html>
