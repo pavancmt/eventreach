@@ -6,19 +6,15 @@
   <title>EventReach - Your Personal Invitation Concierge</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- ✅ Supabase CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- ✅ Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: "Inter", sans-serif; }
-    h1, h2, h3 { font-family: "Playfair Display", serif; }
-    .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
-    #pricing-section { display: none; }
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
   </style>
 </head>
 
@@ -31,7 +27,7 @@
 
     <div class="flex items-center gap-4">
       <a href="https://wa.me/91XXXXXXXXXX"
-        class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">
+         class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">
         WhatsApp Us
       </a>
     </div>
@@ -69,26 +65,29 @@
         Details will be saved to our database and emailed to us.
       </p>
 
-      <!-- ✅ Formspree + Supabase -->
-      <form id="inquiryForm" action="https://formspree.io/f/xdaapbje" method="POST" class="space-y-5">
+      <!-- ✅ Formspree stays same -->
+      <form id="inquiryForm"
+            action="https://formspree.io/f/xdaapbje"
+            method="POST"
+            class="space-y-5">
 
         <input type="text" name="name" placeholder="Full Name"
-          class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
-          required />
+               class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+               required>
 
         <div class="grid grid-cols-2 gap-4">
           <input type="tel" name="phone" placeholder="Phone Number"
-            class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
-            required />
+                 class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+                 required>
 
           <input type="number" name="guest_count" placeholder="No. of Guests"
-            class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
-            required />
+                 class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+                 required>
         </div>
 
         <select name="language"
-          class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
-          required>
+                class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+                required>
           <option value="">Preferred Language</option>
           <option value="Telugu">Telugu</option>
           <option value="Hindi">Hindi</option>
@@ -96,94 +95,92 @@
         </select>
 
         <textarea name="message" placeholder="Describe your event details..."
-          class="w-full p-4 bg-gray-50 border-none rounded-2xl h-32 focus:ring-2 focus:ring-rose-400 outline-none"></textarea>
+                  class="w-full p-4 bg-gray-50 border-none rounded-2xl h-32 focus:ring-2 focus:ring-rose-400 outline-none"></textarea>
 
         <button type="submit" id="submitBtn"
-          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg">
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg">
           Submit Inquiry
         </button>
+
+        <!-- ✅ Optional message box -->
+        <p id="statusMsg" class="text-center text-sm font-semibold mt-3"></p>
+
       </form>
     </div>
-
   </main>
 
   <script>
-    // ✅ Supabase Setup (YOUR PROJECT)
-    const SB_URL = "https://camzrkmcnxgwaaseyhsa.supabase.co";
-    const SB_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt"; // ✅ paste your real publishable key
+    // ✅ Replace with your real Supabase Project URL + Publishable Key
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-    // ✅ Create Supabase client
-    const db = window.supabase.createClient(SB_URL, SB_KEY);
-
-    console.log("✅ Supabase Loaded Client:", db);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const form = document.getElementById("inquiryForm");
     const btn = document.getElementById("submitBtn");
+    const statusMsg = document.getElementById("statusMsg");
+
+    function setStatus(message, type = "info") {
+      statusMsg.textContent = message;
+      statusMsg.className = "text-center text-sm font-semibold mt-3";
+
+      if (type === "success") statusMsg.classList.add("text-green-600");
+      if (type === "error") statusMsg.classList.add("text-red-600");
+      if (type === "info") statusMsg.classList.add("text-gray-600");
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      setStatus("", "info");
       btn.disabled = true;
-      btn.innerText = "Saving Details...";
+      btn.innerText = "Submitting...";
 
       const formData = new FormData(form);
 
-      const dataToSave = {
+      const payload = {
         name: formData.get("name"),
         phone: formData.get("phone"),
-        guest_count: parseInt(formData.get("guest_count")),
+        guest_count: Number(formData.get("guest_count")),
         language: formData.get("language"),
-        message: formData.get("message"),
-        status: "pending"
+        message: formData.get("message")
       };
 
       try {
-        // ✅ 1) Insert to Supabase DB
-        const { data, error } = await db
+        // ✅ 1) Insert to Supabase
+        const { error } = await supabaseClient
           .from("inquiries")
-          .insert([dataToSave])
-          .select();
-
-        // ✅ Debug Output
-        console.log("✅ Supabase Insert Result:", data);
-        console.log("❌ Supabase Insert Error:", error);
+          .insert([payload]);
 
         if (error) {
-          alert("Database Error: " + error.message);
+          console.error("Supabase Insert Error:", error);
+          setStatus("❌ Database save failed: " + error.message, "error");
           btn.disabled = false;
           btn.innerText = "Submit Inquiry";
           return;
         }
 
-        // ✅ 2) Email send (Formspree)
-        const response = await fetch(form.action, {
+        // ✅ 2) Send email via Formspree
+        const res = await fetch(form.action, {
           method: "POST",
           body: formData,
           headers: { "Accept": "application/json" }
         });
 
-        if (response.ok) {
-          document.getElementById("form-card").innerHTML = `
-            <div class="text-center py-10">
-              <h3 class="text-3xl font-bold text-green-600 mb-4">Success!</h3>
-              <p class="text-gray-600">Your inquiry has been saved in Supabase and emailed to us.</p>
-              <button onclick="location.reload()"
-                class="mt-6 text-indigo-600 font-bold underline">
-                Add New Inquiry
-              </button>
-            </div>`;
+        if (res.ok) {
+          setStatus("✅ Submitted Successfully! We will contact you soon.", "success");
+          form.reset();
         } else {
-          alert("✅ Saved in Supabase, but ❌ Email failed!");
-          btn.disabled = false;
-          btn.innerText = "Submit Inquiry";
+          setStatus("⚠ Saved in database, but email sending failed.", "error");
         }
 
       } catch (err) {
-        alert("❌ Fetch Error: " + err.message);
-        console.error(err);
-        btn.disabled = false;
-        btn.innerText = "Submit Inquiry";
+        console.error("Unexpected Error:", err);
+        setStatus("❌ Something went wrong. Please try again.", "error");
       }
+
+      btn.disabled = false;
+      btn.innerText = "Submit Inquiry";
     });
   </script>
 
