@@ -9,16 +9,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-900">
 
 <div class="max-w-6xl mx-auto px-4 py-10">
 
-  <h1 class="text-3xl font-bold text-indigo-600 mb-2">EventReach Admin Dashboard</h1>
-  <p class="text-gray-500 mb-6">Login using Admin Email + PIN</p>
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-indigo-600">Admin Panel</h1>
+      <p class="text-sm text-gray-500">Manage Pricing Settings</p>
+    </div>
+  </div>
 
-  <!-- ✅ LOGIN -->
-  <div id="loginBox" class="bg-white p-6 rounded-2xl shadow border mb-8">
-    <h2 class="text-xl font-bold mb-4">Admin Login</h2>
+  <!-- ✅ Admin Login -->
+  <div id="loginBox" class="bg-white p-6 rounded-2xl border shadow mb-8">
+    <h2 class="text-xl font-bold mb-3">Admin Login</h2>
 
     <div class="grid md:grid-cols-2 gap-4">
       <input id="emailInput" type="email" placeholder="Admin Email"
@@ -36,46 +40,54 @@
     <p id="loginStatus" class="mt-3 text-sm font-semibold"></p>
   </div>
 
-  <!-- ✅ DASHBOARD -->
-  <div id="dashboardBox" class="hidden">
+  <!-- ✅ Dashboard -->
+  <div id="dashboardBox" class="hidden space-y-8">
 
-    <div class="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
-      <input id="searchBox" type="text"
-        class="w-full p-3 rounded-xl border focus:ring-2 focus:ring-indigo-400 outline-none"
-        placeholder="Search by name / phone / language...">
+    <!-- SETTINGS -->
+    <div class="bg-white p-6 rounded-2xl border shadow">
+      <h2 class="text-xl font-bold mb-4">Pricing Controls</h2>
 
-      <button id="refreshBtn"
-        class="w-full md:w-auto px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition">
-        Refresh
+      <div class="grid md:grid-cols-2 gap-4">
+        <label class="flex items-center gap-3 p-4 rounded-xl border bg-gray-50">
+          <input type="checkbox" id="showPricingToggle" class="w-5 h-5">
+          <span class="font-semibold">Show Pricing Section</span>
+        </label>
+
+        <label class="flex items-center gap-3 p-4 rounded-xl border bg-gray-50">
+          <input type="checkbox" id="pricingAnimToggle" class="w-5 h-5">
+          <span class="font-semibold">Enable Pricing Animations</span>
+        </label>
+      </div>
+
+      <button id="saveSettingsBtn"
+        class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl transition">
+        ✅ Save Settings
       </button>
+
+      <p id="settingsStatus" class="mt-3 text-sm font-semibold"></p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow border overflow-hidden">
-      <div class="p-4 border-b flex justify-between items-center">
-        <h2 class="font-bold text-lg">Customer Inquiries</h2>
-        <span id="countBadge" class="text-sm font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">0</span>
+    <!-- PLANS -->
+    <div class="bg-white p-6 rounded-2xl border shadow">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="text-xl font-bold">Pricing Plans</h2>
+        <button id="reloadPlansBtn"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2 rounded-xl transition">
+          🔄 Reload Plans
+        </button>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-100 text-gray-600">
-            <tr>
-              <th class="text-left px-4 py-3">Date</th>
-              <th class="text-left px-4 py-3">Name</th>
-              <th class="text-left px-4 py-3">Phone</th>
-              <th class="text-left px-4 py-3">Guests</th>
-              <th class="text-left px-4 py-3">Language</th>
-              <th class="text-left px-4 py-3">Message</th>
-            </tr>
-          </thead>
-          <tbody id="rows" class="divide-y"></tbody>
-        </table>
-      </div>
+      <div id="plansBox" class="mt-5 grid md:grid-cols-3 gap-6"></div>
+
+      <button id="savePlansBtn"
+        class="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
+        ✅ Save All Plan Changes
+      </button>
+
+      <p id="plansStatus" class="mt-3 text-sm font-semibold"></p>
     </div>
 
-    <p id="statusMsg" class="mt-4 text-sm font-semibold"></p>
   </div>
-
 </div>
 
 <script>
@@ -84,9 +96,9 @@
   const SUPABASE_ANON_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt";
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ✅ Admin Access Rules
+  // ✅ Admin PIN (frontend trick)
   const ADMIN_EMAIL = "kps13082000@gmail.com";
-  const ADMIN_PIN = "1234"; // your code
+  const ADMIN_PIN = "2550";
 
   const loginBox = document.getElementById("loginBox");
   const dashboardBox = document.getElementById("dashboardBox");
@@ -96,130 +108,193 @@
   const loginBtn = document.getElementById("loginBtn");
   const loginStatus = document.getElementById("loginStatus");
 
-  const refreshBtn = document.getElementById("refreshBtn");
-  const rows = document.getElementById("rows");
-  const searchBox = document.getElementById("searchBox");
-  const countBadge = document.getElementById("countBadge");
-  const statusMsg = document.getElementById("statusMsg");
+  const showPricingToggle = document.getElementById("showPricingToggle");
+  const pricingAnimToggle = document.getElementById("pricingAnimToggle");
+  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+  const settingsStatus = document.getElementById("settingsStatus");
 
-  let allData = [];
+  const plansBox = document.getElementById("plansBox");
+  const savePlansBtn = document.getElementById("savePlansBtn");
+  const reloadPlansBtn = document.getElementById("reloadPlansBtn");
+  const plansStatus = document.getElementById("plansStatus");
 
-  function setLoginStatus(msg, type="info") {
-    loginStatus.textContent = msg;
-    loginStatus.className = "mt-3 text-sm font-semibold";
-    if (type === "success") loginStatus.classList.add("text-green-600");
-    if (type === "error") loginStatus.classList.add("text-red-600");
-    if (type === "info") loginStatus.classList.add("text-gray-600");
-  }
+  let plansCache = [];
 
-  function setStatus(msg, type="info") {
-    statusMsg.textContent = msg;
-    statusMsg.className = "mt-4 text-sm font-semibold";
-    if (type === "success") statusMsg.classList.add("text-green-600");
-    if (type === "error") statusMsg.classList.add("text-red-600");
-    if (type === "info") statusMsg.classList.add("text-gray-600");
-  }
-
-  function escapeHtml(str) {
-    return (str || "")
-      .toString()
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
-  }
-
-  function renderTable(data) {
-    rows.innerHTML = "";
-    countBadge.textContent = data.length + " Records";
-
-    if (!data.length) {
-      rows.innerHTML = `
-        <tr>
-          <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-            No inquiries found.
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    data.forEach((item) => {
-      const date = item.created_at ? new Date(item.created_at).toLocaleString() : "-";
-
-      rows.innerHTML += `
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-3 whitespace-nowrap">${escapeHtml(date)}</td>
-          <td class="px-4 py-3 font-semibold">${escapeHtml(item.name)}</td>
-          <td class="px-4 py-3">${escapeHtml(item.phone)}</td>
-          <td class="px-4 py-3">${escapeHtml(item.guest_count)}</td>
-          <td class="px-4 py-3">${escapeHtml(item.language)}</td>
-          <td class="px-4 py-3 max-w-md">${escapeHtml(item.message || "")}</td>
-        </tr>
-      `;
-    });
-  }
-
-  async function loadInquiries() {
-    setStatus("Loading inquiries...", "info");
-
-    const { data, error } = await supabaseClient
-      .from("inquiries")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error(error);
-      setStatus("❌ Failed to load inquiries: " + error.message, "error");
-      return;
-    }
-
-    allData = data || [];
-    renderTable(allData);
-    setStatus("✅ Loaded successfully", "success");
+  function setMsg(el, msg, type="info") {
+    el.textContent = msg;
+    el.className = "mt-3 text-sm font-semibold";
+    if (type === "success") el.classList.add("text-green-600");
+    if (type === "error") el.classList.add("text-red-600");
+    if (type === "info") el.classList.add("text-gray-600");
   }
 
   function showDashboard() {
     loginBox.classList.add("hidden");
     dashboardBox.classList.remove("hidden");
-    loadInquiries();
   }
 
-  loginBtn.addEventListener("click", () => {
+  loginBtn.addEventListener("click", async () => {
     const email = emailInput.value.trim().toLowerCase();
     const pin = pinInput.value.trim();
 
     if (email !== ADMIN_EMAIL.toLowerCase()) {
-      setLoginStatus("❌ Not allowed. Admin email only.", "error");
+      setMsg(loginStatus, "❌ Only admin email is allowed", "error");
       return;
     }
-
     if (pin !== ADMIN_PIN) {
-      setLoginStatus("❌ Wrong PIN.", "error");
+      setMsg(loginStatus, "❌ Wrong PIN", "error");
       return;
     }
 
-    setLoginStatus("✅ Login Success! Opening dashboard...", "success");
+    setMsg(loginStatus, "✅ Login success!", "success");
     showDashboard();
+
+    await loadSettings();
+    await loadPlans();
   });
 
-  refreshBtn.addEventListener("click", loadInquiries);
+  async function loadSettings() {
+    const { data, error } = await supabaseClient
+      .from("site_settings")
+      .select("*")
+      .eq("id", 1)
+      .single();
 
-  searchBox.addEventListener("input", () => {
-    const q = searchBox.value.trim().toLowerCase();
-    if (!q) return renderTable(allData);
+    if (error) {
+      console.error(error);
+      setMsg(settingsStatus, "❌ Failed to load settings: " + error.message, "error");
+      return;
+    }
 
-    const filtered = allData.filter((x) =>
-      (x.name || "").toLowerCase().includes(q) ||
-      (x.phone || "").toLowerCase().includes(q) ||
-      (x.language || "").toLowerCase().includes(q) ||
-      (x.message || "").toLowerCase().includes(q)
-    );
+    showPricingToggle.checked = !!data.show_pricing;
+    pricingAnimToggle.checked = !!data.pricing_animations;
 
-    renderTable(filtered);
+    setMsg(settingsStatus, "✅ Settings loaded", "success");
+  }
+
+  saveSettingsBtn.addEventListener("click", async () => {
+    setMsg(settingsStatus, "Saving settings...", "info");
+
+    const { error } = await supabaseClient
+      .from("site_settings")
+      .update({
+        show_pricing: showPricingToggle.checked,
+        pricing_animations: pricingAnimToggle.checked,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", 1);
+
+    if (error) {
+      console.error(error);
+      setMsg(settingsStatus, "❌ Save failed: " + error.message, "error");
+      return;
+    }
+
+    setMsg(settingsStatus, "✅ Saved successfully! Refresh your website to see changes.", "success");
+  });
+
+  async function loadPlans() {
+    plansBox.innerHTML = "Loading plans...";
+    setMsg(plansStatus, "", "info");
+
+    const { data, error } = await supabaseClient
+      .from("pricing_plans")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error(error);
+      plansBox.innerHTML = "";
+      setMsg(plansStatus, "❌ Failed to load plans: " + error.message, "error");
+      return;
+    }
+
+    plansCache = data || [];
+    renderPlans(plansCache);
+    setMsg(plansStatus, "✅ Plans loaded", "success");
+  }
+
+  function renderPlans(plans) {
+    plansBox.innerHTML = "";
+
+    plans.forEach((p, idx) => {
+      plansBox.innerHTML += `
+        <div class="p-5 rounded-2xl border bg-gray-50">
+          <h3 class="font-bold text-lg mb-3">${p.plan_name}</h3>
+
+          <label class="text-sm font-semibold text-gray-600">Price (₹)</label>
+          <input type="number" class="w-full mt-1 p-3 rounded-xl border outline-none"
+            value="${p.price}" data-idx="${idx}" data-field="price">
+
+          <label class="text-sm font-semibold text-gray-600 mt-3 block">Subtitle</label>
+          <input type="text" class="w-full mt-1 p-3 rounded-xl border outline-none"
+            value="${p.subtitle || ""}" data-idx="${idx}" data-field="subtitle">
+
+          <label class="text-sm font-semibold text-gray-600 mt-3 block">Highlight</label>
+          <select class="w-full mt-1 p-3 rounded-xl border outline-none"
+            data-idx="${idx}" data-field="highlight">
+            <option value="false" ${p.highlight ? "" : "selected"}>No</option>
+            <option value="true" ${p.highlight ? "selected" : ""}>Yes</option>
+          </select>
+
+          <label class="text-sm font-semibold text-gray-600 mt-3 block">
+            Features (comma separated)
+          </label>
+          <textarea class="w-full mt-1 p-3 rounded-xl border outline-none h-28"
+            data-idx="${idx}" data-field="features">${(p.features || []).join(", ")}</textarea>
+        </div>
+      `;
+    });
+
+    // listen changes
+    plansBox.querySelectorAll("input, select, textarea").forEach((el) => {
+      el.addEventListener("input", () => {
+        const idx = Number(el.dataset.idx);
+        const field = el.dataset.field;
+
+        if (field === "price") {
+          plansCache[idx].price = Number(el.value || 0);
+        } else if (field === "subtitle") {
+          plansCache[idx].subtitle = el.value;
+        } else if (field === "highlight") {
+          plansCache[idx].highlight = (el.value === "true");
+        } else if (field === "features") {
+          plansCache[idx].features = el.value
+            .split(",")
+            .map(x => x.trim())
+            .filter(Boolean);
+        }
+      });
+    });
+  }
+
+  reloadPlansBtn.addEventListener("click", loadPlans);
+
+  savePlansBtn.addEventListener("click", async () => {
+    setMsg(plansStatus, "Saving plan changes...", "info");
+
+    for (const p of plansCache) {
+      const { error } = await supabaseClient
+        .from("pricing_plans")
+        .update({
+          price: p.price,
+          subtitle: p.subtitle,
+          highlight: p.highlight,
+          features: p.features,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", p.id);
+
+      if (error) {
+        console.error(error);
+        setMsg(plansStatus, "❌ Failed saving " + p.plan_name + ": " + error.message, "error");
+        return;
+      }
+    }
+
+    setMsg(plansStatus, "✅ All plans saved! Refresh website to see changes.", "success");
   });
 </script>
 
 </body>
 </html>
-
