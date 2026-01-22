@@ -7,55 +7,166 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- ✅ Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body { font-family: 'Inter', sans-serif; }
     h1, h2, h3 { font-family: 'Playfair Display', serif; }
-    .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+
+    .glass { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(12px); }
+
+    /* ✅ Floating bubbles background */
+    .bubble-wrap {
+      position: fixed; inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -120px;
+      border-radius: 9999px;
+      opacity: 0.18;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) translateX(0) scale(1); }
+      100% { transform: translateY(-120vh) translateX(80px) scale(1.15); }
+    }
+
+    /* ✅ Page animations */
+    .fade-in { animation: fadeIn 1s ease-in-out forwards; opacity: 0; }
+    .slide-up { animation: slideUp 1.05s ease forwards; opacity: 0; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0px); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0px); }
+    }
+
+    /* ✅ Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+    }
+    .modal-backdrop.show { display: flex; }
+
+    /* ✅ Remove number arrows */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] { -moz-appearance: textfield; }
   </style>
 </head>
 
-<body class="bg-rose-50/30 text-gray-800">
+<body class="bg-rose-50/30 text-gray-800 relative">
 
+  <!-- ✅ Floating bubbles -->
+  <div class="bubble-wrap">
+    <div class="bubble bg-rose-400" style="left: 10%; width: 90px; height: 90px; animation-duration: 16s;"></div>
+    <div class="bubble bg-indigo-400" style="left: 28%; width: 140px; height: 140px; animation-duration: 20s; animation-delay: 2s;"></div>
+    <div class="bubble bg-pink-300" style="left: 45%; width: 70px; height: 70px; animation-duration: 14s; animation-delay: 4s;"></div>
+    <div class="bubble bg-purple-300" style="left: 65%; width: 120px; height: 120px; animation-duration: 22s; animation-delay: 1s;"></div>
+    <div class="bubble bg-rose-300" style="left: 82%; width: 160px; height: 160px; animation-duration: 26s; animation-delay: 3s;"></div>
+  </div>
+
+  <!-- NAVBAR -->
   <nav class="fixed w-full z-50 glass border-b border-rose-100 px-6 py-4 flex justify-between items-center">
     <div class="text-2xl font-bold text-rose-600 tracking-tight">
       EventReach<span class="text-indigo-600">.in</span>
     </div>
+
+    <div class="flex items-center gap-3">
+      <a href="#pricing" class="hidden md:inline-block text-sm font-semibold text-gray-700 hover:text-indigo-600 transition">
+        Pricing
+      </a>
+
+      <a href="https://wa.me/91XXXXXXXXXX"
+        class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">
+        WhatsApp Us
+      </a>
+    </div>
   </nav>
 
-  <header class="relative pt-32 pb-20 px-6 text-center overflow-hidden">
-    <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-      Leave the Invitations <br><span class="text-rose-600">to us.</span>
-    </h2>
-    <p class="max-w-2xl mx-auto text-lg text-gray-600 leading-relaxed mb-8">
-      Specializing in Telugu, Hindi, and English outreach. We call your guests and manage your RSVP list professionally.
-    </p>
+  <!-- HERO -->
+  <header class="relative pt-32 pb-14 px-6 text-center overflow-hidden z-10">
+    <div class="max-w-4xl mx-auto fade-in">
+      <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+        Leave the Invitations <br><span class="text-rose-600">to us.</span>
+      </h2>
+
+      <p class="max-w-2xl mx-auto text-lg text-gray-600 leading-relaxed mb-6">
+        “Your guests deserve a warm call, not a forwarded message.” 💌
+      </p>
+
+      <div class="flex items-center justify-center gap-3 flex-wrap">
+        <span class="text-xs font-bold bg-white/70 px-3 py-1 rounded-full border">✅ RSVP Tracking</span>
+        <span class="text-xs font-bold bg-white/70 px-3 py-1 rounded-full border">✅ Polite Reminders</span>
+        <span class="text-xs font-bold bg-white/70 px-3 py-1 rounded-full border">✅ Friendly Voice Calls</span>
+      </div>
+
+      <div class="mt-8 flex justify-center gap-3">
+        <a href="#form-card"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl shadow-lg transition hover:scale-[1.02] active:scale-[0.98]">
+          Book Now
+        </a>
+        <a href="#pricing"
+          class="bg-white/80 hover:bg-white text-gray-800 font-bold px-6 py-3 rounded-2xl shadow transition border">
+          View Pricing
+        </a>
+      </div>
+    </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start pb-20">
+  <!-- MAIN -->
+  <main class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start pb-20 z-10 relative">
 
-    <div class="space-y-10">
+    <!-- LEFT -->
+    <div class="space-y-10 slide-up">
       <div>
         <h3 class="text-3xl font-bold mb-6">How we help you</h3>
+
         <div class="grid gap-6">
-          <div class="flex gap-4">
+          <div class="flex gap-4 bg-white/70 p-5 rounded-3xl shadow-sm hover:shadow-lg transition">
             <div class="bg-white p-3 rounded-2xl shadow-sm text-2xl">🌍</div>
             <div>
               <h4 class="font-bold text-lg">Native Language Calling</h4>
               <p class="text-gray-600">Warm, respectful invitations in Telugu, Hindi, or English.</p>
             </div>
           </div>
+
+          <div class="flex gap-4 bg-white/70 p-5 rounded-3xl shadow-sm hover:shadow-lg transition">
+            <div class="bg-white p-3 rounded-2xl shadow-sm text-2xl">📋</div>
+            <div>
+              <h4 class="font-bold text-lg">RSVP Tracking</h4>
+              <p class="text-gray-600">Confirmed / Not Coming / Not Reachable — neatly tracked.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 bg-white/70 p-5 rounded-3xl shadow-sm hover:shadow-lg transition">
+            <div class="bg-white p-3 rounded-2xl shadow-sm text-2xl">📞</div>
+            <div>
+              <h4 class="font-bold text-lg">Polite Reminders</h4>
+              <p class="text-gray-600">We follow up gently so you don’t have to stress.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-rose-50" id="form-card">
+    <!-- FORM -->
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-rose-50 slide-up" id="form-card">
       <h3 class="text-2xl font-bold mb-2 text-center">Book Your Slot</h3>
       <p class="text-center text-gray-500 mb-8 text-sm">
-        Details will be saved to our database and emailed to us.
+        Details will be saved securely and emailed to us.
       </p>
 
       <form id="inquiryForm"
@@ -67,16 +178,22 @@
           class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
           required>
 
-        <!-- ✅ Hidden admin trigger email input -->
-        <input type="email" name="email" placeholder="Email (optional)"
+        <!-- ✅ Used for admin trick + optional customer email -->
+        <input type="email" name="email" id="email"
+          placeholder="Email (optional)"
           class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none">
 
         <div class="grid grid-cols-2 gap-4">
-          <input type="tel" name="phone" placeholder="Phone Number"
+          <input type="tel" name="phone" id="phone"
+            placeholder="Mobile Number (10 digits)"
+            maxlength="10"
+            inputmode="numeric"
+            pattern="[0-9]{10}"
             class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
             required>
 
-          <input type="number" name="guest_count" placeholder="No. of Guests"
+          <input type="number" name="guest_count" id="guest_count"
+            placeholder="Guests (min 100)"
             class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
             required>
         </div>
@@ -90,11 +207,14 @@
           <option value="English">English</option>
         </select>
 
-        <textarea name="message" placeholder="Describe your event details..."
-          class="w-full p-4 bg-gray-50 border-none rounded-2xl h-32 focus:ring-2 focus:ring-rose-400 outline-none"></textarea>
+        <!-- ✅ Event Type -->
+        <input type="text" name="event_type" id="event_type"
+          placeholder="Event Type (Marriage / Birthday / Housewarming / Political Campaign...)"
+          class="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-400 outline-none"
+          required>
 
         <button type="submit" id="submitBtn"
-          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg">
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg hover:scale-[1.02] active:scale-[0.98]">
           Submit Inquiry
         </button>
 
@@ -103,20 +223,95 @@
     </div>
   </main>
 
+  <!-- ✅ Pricing Section (Dynamic from Supabase) -->
+  <section id="pricing" class="max-w-6xl mx-auto px-6 pb-24 z-10 relative hidden">
+    <div id="pricingCard" class="bg-white/80 border rounded-3xl shadow-xl p-8 md:p-10">
+      <div class="text-center mb-10">
+        <h3 class="text-3xl font-bold">Pricing</h3>
+        <p class="text-gray-600 mt-2">Simple plans for every event size 💙</p>
+      </div>
+
+      <div id="pricingGrid" class="grid md:grid-cols-3 gap-6"></div>
+
+      <div class="text-center mt-10">
+        <a href="#form-card"
+          class="inline-block bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-3 rounded-2xl shadow-lg transition">
+          Book a Plan 🚀
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ Thank You Modal -->
+  <div id="thankYouModal" class="modal-backdrop">
+    <div class="bg-white rounded-3xl shadow-2xl w-[92%] max-w-md p-7 border">
+      <h3 class="text-2xl font-bold text-indigo-600">✅ Inquiry Submitted!</h3>
+      <p class="text-gray-600 mt-2">
+        Thanks! Our team will contact you soon on WhatsApp/Call.
+      </p>
+
+      <div class="mt-5 flex gap-3">
+        <button id="closeModalBtn"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition">
+          Close
+        </button>
+
+        <a href="https://wa.me/91XXXXXXXXXX"
+          class="w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-2xl transition">
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ✅ Supabase
+    // ✅ Replace with your Supabase URL & key
     const SUPABASE_URL = "https://camzrkmcnxgwaaseyhsa.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_9_rF9TbHlX5-hWe_0q3V3g_9nMaFFIt";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ✅ Admin Trick Setup
     const ADMIN_EMAIL = "kps13082000@gmail.com";
-    const ADMIN_CODE = "1234";
-    const ADMIN_PAGE = "admin.html"; // <-- create this file next
+    const ADMIN_PIN = "2550";
+    const ADMIN_PAGE = "admin.html";
 
     const form = document.getElementById("inquiryForm");
     const btn = document.getElementById("submitBtn");
     const statusMsg = document.getElementById("statusMsg");
+
+    const phoneInput = document.getElementById("phone");
+    const guestInput = document.getElementById("guest_count");
+    const eventTypeInput = document.getElementById("event_type");
+    const emailInput = document.getElementById("email");
+
+    const thankYouModal = document.getElementById("thankYouModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const pricingSection = document.getElementById("pricing");
+    const pricingCard = document.getElementById("pricingCard");
+    const pricingGrid = document.getElementById("pricingGrid");
+
+    // ✅ smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener("click", (e) => {
+        const href = a.getAttribute("href");
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+
+    // ✅ Only digits in phone
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    // ✅ Only positive guest count (digits only)
+    guestInput.addEventListener("input", () => {
+      guestInput.value = guestInput.value.replace(/\D/g, "");
+    });
 
     function setStatus(message, type = "info") {
       statusMsg.textContent = message;
@@ -126,58 +321,147 @@
       if (type === "info") statusMsg.classList.add("text-gray-600");
     }
 
+    function openModal() { thankYouModal.classList.add("show"); }
+    function closeModal() { thankYouModal.classList.remove("show"); }
+
+    closeModalBtn.addEventListener("click", closeModal);
+    thankYouModal.addEventListener("click", (e) => { if (e.target === thankYouModal) closeModal(); });
+
+    // ✅ Pricing load from Supabase
+    async function loadPricingFromSupabase() {
+      const { data: settings, error: sErr } = await supabaseClient
+        .from("site_settings")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (sErr) {
+        console.error("Settings load error:", sErr);
+        return;
+      }
+
+      if (!settings.show_pricing) {
+        pricingSection.classList.add("hidden");
+        return;
+      } else {
+        pricingSection.classList.remove("hidden");
+      }
+
+      if (settings.pricing_animations) {
+        pricingCard.classList.add("slide-up");
+      } else {
+        pricingCard.classList.remove("slide-up");
+        pricingCard.style.opacity = "1";
+      }
+
+      const { data: plans, error: pErr } = await supabaseClient
+        .from("pricing_plans")
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (pErr) {
+        console.error("Plans load error:", pErr);
+        return;
+      }
+
+      pricingGrid.innerHTML = "";
+
+      plans.forEach((p) => {
+        const isHighlight = p.highlight === true;
+
+        pricingGrid.innerHTML += `
+          <div class="${
+            isHighlight
+              ? "bg-indigo-600 text-white rounded-3xl shadow-lg p-6 hover:scale-[1.02] transition"
+              : "bg-white rounded-3xl border shadow-sm p-6 hover:shadow-lg transition"
+          }">
+            <h4 class="text-xl font-bold">${p.plan_name}</h4>
+            <p class="${isHighlight ? "text-indigo-100" : "text-gray-500"} text-sm mt-1">
+              ${p.subtitle || ""}
+            </p>
+            <p class="text-3xl font-extrabold mt-4 ${isHighlight ? "" : "text-indigo-600"}">
+              ₹${p.price}
+            </p>
+            <ul class="mt-4 space-y-2 text-sm">
+              ${(p.features || []).map(f => `<li>✅ ${f}</li>`).join("")}
+            </ul>
+          </div>
+        `;
+      });
+    }
+
+    loadPricingFromSupabase();
+
+    // ✅ Form submit: admin trick + normal inquiry
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      setStatus("");
 
       btn.disabled = true;
       btn.innerText = "Submitting...";
-      setStatus("");
 
       const formData = new FormData(form);
 
       const email = (formData.get("email") || "").toString().trim().toLowerCase();
+      const phone = (formData.get("phone") || "").toString().trim();
+      const guestCount = Number(formData.get("guest_count"));
+      const eventType = (formData.get("event_type") || "").toString().trim();
 
       // ✅ ADMIN TRICK
       if (email === ADMIN_EMAIL.toLowerCase()) {
-        const code = prompt("🔐 Admin Access: Enter Code");
-
-        if (code === ADMIN_CODE) {
-          alert("✅ Admin Verified! Opening Dashboard...");
+        const pin = prompt("🔐 Admin PIN:");
+        if (pin === ADMIN_PIN) {
+          alert("✅ Admin Verified!");
           window.location.href = ADMIN_PAGE;
           return;
         } else {
-          alert("❌ Wrong code! Admin access denied.");
+          alert("❌ Wrong PIN!");
           btn.disabled = false;
           btn.innerText = "Submit Inquiry";
           return;
         }
       }
 
-      // ✅ Normal Customer Flow
+      // ✅ Validations
+      if (!/^\d{10}$/.test(phone)) {
+        setStatus("❌ Mobile number must be exactly 10 digits", "error");
+        btn.disabled = false; btn.innerText = "Submit Inquiry";
+        return;
+      }
+
+      if (!Number.isFinite(guestCount) || guestCount < 100 || guestCount > 10000) {
+        setStatus("❌ Guest count must be between 100 and 10,000", "error");
+        btn.disabled = false; btn.innerText = "Submit Inquiry";
+        return;
+      }
+
+      if (eventType.length < 3) {
+        setStatus("❌ Please enter a valid event type (Marriage, Birthday, etc.)", "error");
+        btn.disabled = false; btn.innerText = "Submit Inquiry";
+        return;
+      }
+
       const payload = {
         name: formData.get("name"),
         email: email || null,
-        phone: formData.get("phone"),
-        guest_count: Number(formData.get("guest_count")),
+        phone: phone,
+        guest_count: guestCount,
         language: formData.get("language"),
-        message: formData.get("message")
+        event_type: eventType
       };
 
       try {
-        // ✅ 1) Insert into Supabase
-        const { error } = await supabaseClient
-          .from("inquiries")
-          .insert([payload]);
+        // ✅ Save to Supabase
+        const { error } = await supabaseClient.from("inquiries").insert([payload]);
 
         if (error) {
           console.error("Supabase Insert Error:", error);
           setStatus("❌ Database save failed: " + error.message, "error");
-          btn.disabled = false;
-          btn.innerText = "Submit Inquiry";
+          btn.disabled = false; btn.innerText = "Submit Inquiry";
           return;
         }
 
-        // ✅ 2) Email to Formspree
+        // ✅ Send email via Formspree
         const res = await fetch(form.action, {
           method: "POST",
           body: formData,
@@ -185,15 +469,15 @@
         });
 
         if (res.ok) {
-          setStatus("✅ Submitted Successfully! We will contact you soon.", "success");
           form.reset();
+          openModal();
         } else {
           setStatus("⚠ Saved in database, but email sending failed.", "error");
         }
 
       } catch (err) {
-        console.error("Unexpected Error:", err);
-        setStatus("❌ Something went wrong. Please try again.", "error");
+        console.error(err);
+        setStatus("❌ Something went wrong. Try again.", "error");
       }
 
       btn.disabled = false;
